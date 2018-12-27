@@ -1,0 +1,25 @@
+#version 330 core
+
+// Ouput data
+//out vec3 color;
+
+// Input data
+in vec3 theColor;
+uniform sampler2D sampler;
+in vec2 TextureCoord;
+out vec4 outtex;
+
+void main()
+{
+	// we set the color of each fragment to red.
+	//color = vec3(1,0,0);
+	//color = theColor;
+	if(TextureCoord.x == 404 && TextureCoord.y == 404 )
+	{
+		outtex = vec4(theColor, 1.0);
+	}
+	else
+	{
+		outtex=texture(sampler,TextureCoord);
+	}
+}
