@@ -377,14 +377,15 @@ bool Renderer::isColided(Obstacle* o) {
 
 void Renderer::onGameEnd() {
 	gameON = false;
-	PlaySound(TEXT("sound effects/sfx_die.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
 	if (startIndex > highScorce)
 	{
+		PlaySound(TEXT("sound effects/applause.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		cout << "CONGRATULATIONS !! you set a new High Score !\nYour Score is " << startIndex;
 		setHighScore(highScoreFile, startIndex);
 	}
 	else {
+	PlaySound(TEXT("sound effects/sfx_die.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		cout << "GAME OVER ! :(\n";
 		cout << "Your Score is : " << startIndex;
 		cout << "\nThe High Score is: " << highScorce;
