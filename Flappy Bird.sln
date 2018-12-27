@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Primitive_Drawing", "Primitive_Drawing\Primitive_Drawing.vcxproj", "{F9DEF291-DF67-4352-B3AF-CC425FA55D1F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Primitive_Drawing", "Flappy Bird\Primitive_Drawing.vcxproj", "{F9DEF291-DF67-4352-B3AF-CC425FA55D1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

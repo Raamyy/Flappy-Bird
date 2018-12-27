@@ -9,6 +9,7 @@
 #include<Windows.h>
 #include<mmsystem.h>
 #include "Obstacle.h"
+#include <string>
 using namespace std;
 #pragma once
 
@@ -44,4 +45,6 @@ public:
 	void handleKeyboard(int);
 	void handleMouse(double,double);
 	bool isColided(Obstacle* o);
+	int getHighScore(string);
+	void setHighScore(string,int);
 };

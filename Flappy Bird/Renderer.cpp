@@ -3,13 +3,16 @@
 #include <vector>
 #include <time.h>
 #include <stdlib.h>
-
+#include <fstream>
 
 #define RED 1.0f, 0.0f, 0.0f
 #define GREEN 0.0f, 1.0f, 0.0f
 #define BLUE 0.4f, 0.8f, 0.8f
 #define GRAY 0.6f, 0.6f, 0.6f
 #define NO_TEXTURE 404.0f,404.0f
+
+string highScoreFile = "High Score.txt";
+int highScorce = 0;
 
 bool one = true; // For texture swapping
 bool gameON = true;
@@ -26,7 +29,6 @@ const int pipesNumber = 100; // Maximum Number of Pipes
 vector<Obstacle*>pipes(pipesNumber); // Array of pipes
 int Count = 0;
 const int PipesFrequency = 150; // every x frames a pipe spawns
-
 
 
 static const GLfloat verts[] = {
@@ -71,6 +73,36 @@ Renderer::~Renderer()
 }
 
 
+int Renderer::getHighScore(string filename)
+{
+	fstream file;
+	file.open(filename);
+	if (!file) {
+		// create scores file if it doesnt exist
+		ofstream newFile(filename);
+		newFile << 0;
+		newFile.close();
+		return 0;
+	}
+	int score;
+	file >> score;
+	file.close();
+	return score;
+}
+
+void Renderer::setHighScore(string filename,int newScore)
+{
+	fstream file;
+	file.open(filename,ios::out|ios::trunc);
+	if (!file) {
+		cout << "Unable to open file datafile.txt";
+		return;
+	}
+	file << newScore;
+	file.close();
+	return;
+}
+
 void Renderer::Initialize()
 {
 	srand(time(NULL));
@@ -80,8 +112,8 @@ void Renderer::Initialize()
 	texture3 = new Texture("textures/bird3.png", 0);
 	Groundtexture = new Texture("textures/ground.png", 0);
 
+	highScorce = getHighScore(highScoreFile);
 
-	texture1->Bind();
 	// Creating Vertex-Array-Object (VAO). Not used here, check the handout to see its importance.
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
@@ -338,8 +370,6 @@ bool Renderer::isColided(Obstacle* o) {
 	else if (o->position == 1) //down
 		collisionY = BirdPositionY <= (o->height - 6.4f);
 
-	if (collisionX && collisionY)
-		cout << "Bird: " << BirdPositionY << "<= condition: " << o->height - 6 << '\n';
 
 	// Collision only if on both axes
 	return collisionX && collisionY;
@@ -348,6 +378,15 @@ bool Renderer::isColided(Obstacle* o) {
 void Renderer::onGameEnd() {
 	gameON = false;
 	PlaySound(TEXT("sound effects/sfx_die.wav"), NULL, SND_FILENAME | SND_ASYNC);
-	cout << "GAME OVER ! :(\n";
-	cout << "Your Score is : " << startIndex;
+
+	if (startIndex > highScorce)
+	{
+		cout << "CONGRATULATIONS !! you set a new High Score !\nYour Score is " << startIndex;
+		setHighScore(highScoreFile, startIndex);
+	}
+	else {
+		cout << "GAME OVER ! :(\n";
+		cout << "Your Score is : " << startIndex;
+		cout << "\nThe High Score is: " << highScorce;
+	}
 }
