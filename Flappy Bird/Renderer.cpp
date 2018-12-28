@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <fstream>
+#include<irrKlang.h>
 
 #define RED 1.0f, 0.0f, 0.0f
 #define GREEN 0.0f, 1.0f, 0.0f
@@ -25,11 +26,18 @@ int startIndex = 0; // start index for rendering pipes
 int pipeCounter = 0; // Number of Spwaned Pipes
 
 
-const int pipesNumber = 100; // Maximum Number of Pipes
+const int pipesNumber = 200; // Maximum Number of Pipes
 vector<Obstacle*>pipes(pipesNumber); // Array of pipes
 int Count = 0;
-const int PipesFrequency = 150; // every x frames a pipe spawns
+int PipesFrequency = 150; // every x frames a pipe spawns
+int currentScore = 0;
 
+int lastIndex = -1; //helper for sound playing
+
+#pragma comment(lib, "irrKlang.lib")
+using namespace irrklang;
+
+ISoundEngine *SoundEngine;
 
 static const GLfloat verts[] = {
 	//BIRD
@@ -106,6 +114,9 @@ void Renderer::setHighScore(string filename,int newScore)
 void Renderer::Initialize()
 {
 	srand(time(NULL));
+
+	SoundEngine = createIrrKlangDevice();
+	SoundEngine->play2D("sound effects/Theme Song.mp3", GL_TRUE);
 
 	texture1 = new Texture("textures/bird1.png", 0);
 	texture2 = new Texture("textures/bird2.png", 0);
@@ -198,6 +209,11 @@ void Renderer::Initialize()
 bool Renderer::Draw()
 {
 	frame++;
+
+	if (frame % 1000 == 0) {
+		PipesFrequency -= 10;
+		cout << "level up !\n";
+	}
 
 	glBindVertexArray(VertexArrayID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
@@ -300,13 +316,23 @@ bool Renderer::Draw()
 		Count = 0;
 
 	// Draw the Pipes
+	
 	for (int i = startIndex; i < pipeCounter; i++) {
 		pipes[i]->Draw(Camera.GetViewMatrix(), Camera.GetProjectionMatrix());
+		//cout << pipes[startIndex]->currentX << endl;
+		if (pipes[startIndex]->currentX <= 6.0f && startIndex != lastIndex)
+		{
+			lastIndex = startIndex;
+			currentScore++;
+			SoundEngine->play2D("sound effects/coin.wav");
 
-		if (pipes[i]->currentX <= 1)
+		}
+		if (pipes[startIndex]->currentX <= 1.0f)
 		{
 			startIndex = i + 1;
 		}
+
+
 	}
 
 
@@ -340,7 +366,8 @@ void Renderer::handleKeyboard(int key)
 	{
 		BirdModelMatrix *= glm::translate(0.0f, -JumpStep, 0.0f);
 		BirdPositionY += JumpStep;
-		PlaySound(TEXT("sound effects/sfx_wing.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		SoundEngine->play2D("sound effects/sfx_wing.wav");
+		///PlaySound(TEXT("sound effects/sfx_wing.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		//Camera.Fly(0.1);
 	}
 	if (key == GLFW_KEY_DOWN)
@@ -377,17 +404,19 @@ bool Renderer::isColided(Obstacle* o) {
 
 void Renderer::onGameEnd() {
 	gameON = false;
-
-	if (startIndex > highScorce)
+	
+	if (currentScore > highScorce)
 	{
-		PlaySound(TEXT("sound effects/applause.wav"), NULL, SND_FILENAME | SND_ASYNC);
-		cout << "CONGRATULATIONS !! you set a new High Score !\nYour Score is " << startIndex;
-		setHighScore(highScoreFile, startIndex);
+		SoundEngine->play2D("sound effects/applause.wav");
+		///PlaySound(TEXT("sound effects/applause.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		cout << "CONGRATULATIONS !! you set a new High Score !\nYour Score is " << currentScore;
+		setHighScore(highScoreFile, currentScore);
 	}
 	else {
-	PlaySound(TEXT("sound effects/sfx_die.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		SoundEngine->play2D("sound effects/sfx_die.wav");
+	///PlaySound(TEXT("sound effects/sfx_die.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		cout << "GAME OVER ! :(\n";
-		cout << "Your Score is : " << startIndex;
+		cout << "Your Score is : " << currentScore;
 		cout << "\nThe High Score is: " << highScorce;
 	}
 }
