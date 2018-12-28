@@ -4,14 +4,17 @@
 #include <time.h>
 #include <stdlib.h>
 #include <fstream>
-#include<irrKlang.h>
+#include <irrKlang.h>
 
+#pragma region Colors Define
 #define RED 1.0f, 0.0f, 0.0f
 #define GREEN 0.0f, 1.0f, 0.0f
 #define BLUE 0.4f, 0.8f, 0.8f
 #define GRAY 0.6f, 0.6f, 0.6f
 #define NO_TEXTURE 404.0f,404.0f
+#pragma endregion Colors Define
 
+#pragma region Glopbal Variables
 string highScoreFile = "High Score.txt";
 int highScorce = 0;
 
@@ -38,8 +41,11 @@ int lastIndex = -1; //helper for sound playing
 using namespace irrklang;
 
 ISoundEngine *SoundEngine;
+#pragma endregion Global Variables
 
 static const GLfloat verts[] = {
+
+#pragma region Bird Verts
 	//BIRD
 	-1.0f,-1.0f,0.0f,GREEN,
 	0.0f,0.0f,
@@ -52,7 +58,9 @@ static const GLfloat verts[] = {
 
 	1.5f,1.0f,0.0f,RED,
 	1.0f,1.0f,
+#pragma endregion Bird Verts
 
+#pragma region Ground Verts
 	//GROUND
 	-3.0,7.0,0.0f,RED,
 	0.0f,0.0f,
@@ -65,7 +73,7 @@ static const GLfloat verts[] = {
 
 	30.0f,13.2,0.0f,RED,
 	1.0f,1.0f,
-
+#pragma endregion Ground Verts
 
 };
 
@@ -114,16 +122,22 @@ void Renderer::setHighScore(string filename,int newScore)
 void Renderer::Initialize()
 {
 	srand(time(NULL));
-
+	highScorce = getHighScore(highScoreFile);
+	
+	#pragma region Intialize sound engine
 	SoundEngine = createIrrKlangDevice();
 	SoundEngine->play2D("sound effects/Theme Song.mp3", GL_TRUE);
+#pragma endregion
 
+	#pragma region Intialize Textures
 	texture1 = new Texture("textures/bird1.png", 0);
 	texture2 = new Texture("textures/bird2.png", 0);
 	texture3 = new Texture("textures/bird3.png", 0);
 	Groundtexture = new Texture("textures/ground.png", 0);
+#pragma endregion 
 
-	highScorce = getHighScore(highScoreFile);
+
+	#pragma region Intializing IDs
 
 	// Creating Vertex-Array-Object (VAO). Not used here, check the handout to see its importance.
 	glGenVertexArrays(1, &VertexArrayID);
@@ -176,24 +190,30 @@ void Renderer::Initialize()
 	glUseProgram(programID);
 
 	mvpMatrixID = glGetUniformLocation(programID, "MVP");
-
+#pragma endregion 
 	
 
+	#pragma region Intializing Camera
 	Camera.SetPerspectiveProjection(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	Camera.Reset(
 		glm::vec3(8, 0, -20), //pos camer 
 		glm::vec3(8, 0, 0), //basa feen
 		glm::vec3(0, -1, 0) //rotation
 	);
+#pragma endregion 
 
+
+	#pragma region Initializing Matricees
 	BirdModelMatrix = glm::mat4(1);
 
 	GroundModelMatrix = glm::mat4(1); // GROUND
 
 	MVP_matrix = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * BirdModelMatrix; // mvp bird
 	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * GroundModelMatrix; // mvp ground
+#pragma endregion 
 
-	//Intializing Pipes Array
+
+	#pragma region Intializing Pipes Array
 	for (int i = 0; i < pipesNumber; i++)
 	{
 		//int pos =1;
@@ -202,6 +222,7 @@ void Renderer::Initialize()
 		pipes[i] = new Obstacle(r, 5.0f, pos);
 		pipes[i]->initialize(programID, Camera.GetViewMatrix(), Camera.GetProjectionMatrix());
 	}
+#pragma endregion 	
 
 }
 
@@ -215,19 +236,21 @@ bool Renderer::Draw()
 		cout<<PipesFrequency<<'\n';
 	}
 
+	#pragma region Binding IDs
 	glBindVertexArray(VertexArrayID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+#pragma endregion 	
 
+	//Update Bird model Matrix and position
 	BirdModelMatrix *= glm::translate(0.0f, GravityForce, 0.0f); // Apply Gravity Force
 	BirdPositionY -= GravityForce;
 
-
-	//cout << BirdPositionY << endl;
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(BLUE, 1.0f);
 
+	#pragma region Vertex Attrib Pointers
 	//6) enable the desired attributes. (Please go to this section for more information about vertex attributes:
 	// the attributes are 0 indexed, and here we have only one attribute.
 	// void glEnableVertexAttribArray( GLuint index);
@@ -270,12 +293,13 @@ bool Renderer::Draw()
 		sizeof(float) * 8,           // stride
 		(char*)(sizeof(float) * 6)   // array buffer offset
 	);
+#pragma endregion 
 
-	// Update Matricees
-	MVP_matrix = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * BirdModelMatrix; 
-	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * GroundModelMatrix;
+	// Update MVP Matricees
+	MVP_matrix = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * BirdModelMatrix;	// for bird
+	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * GroundModelMatrix; // for ground
 
-	// Every 10 frames change textures
+	// Every 10 frames swap textures
 	if (frame % 10 == 0 || frame == 0)
 	{
 		if (one)
@@ -284,28 +308,28 @@ bool Renderer::Draw()
 			one = true;
 	}
 
-
-	glUniformMatrix4fv(mvpMatrixID, 1, GL_FALSE, &MVP_matrix[0][0]);
-
-	
 	if (one)
 		texture2->Bind();
 	else
 		texture1->Bind();
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glUseProgram(programID);
+
+	#pragma region Drawing Bird & Ground
+
+	glUniformMatrix4fv(mvpMatrixID, 1, GL_FALSE, &MVP_matrix[0][0]);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0); // Bird
 
 	Groundtexture->Bind();
 	glUniformMatrix4fv(mvpMatrixID, 1, GL_FALSE, &MVP_matrix2[0][0]);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (void*)(sizeof(GLushort) * 6)); // Ground
-
+#pragma endregion 	
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 
+	#pragma region Drawing Pipes
 	// Increment pipeCounter until count reaches the PipesFrequency
 	if (Count == 0)
 	{
@@ -320,22 +344,23 @@ bool Renderer::Draw()
 	for (int i = startIndex; i < pipeCounter; i++) {
 		pipes[i]->Draw(Camera.GetViewMatrix(), Camera.GetProjectionMatrix());
 		//cout << pipes[startIndex]->currentX << endl;
-		if (pipes[startIndex]->currentX <= 6.0f && startIndex != lastIndex)
+		if (pipes[startIndex]->currentX <= 6.0f && startIndex != lastIndex) // passed bird -> increment score
 		{
 			lastIndex = startIndex;
 			currentScore++;
 			SoundEngine->play2D("sound effects/coin.wav");
 
 		}
-		if (pipes[startIndex]->currentX <= 1.0f)
+		if (pipes[startIndex]->currentX <= 1.0f) // passed the screen -> wont be drawed again
 		{
 			startIndex = i + 1;
 		}
 
 
 	}
+#pragma endregion
 
-
+	#pragma region Collision detection
 	// Collision Detection with floor/celling
 	if (BirdPositionY < -6.0f || BirdPositionY > 7.3f) 
 	{
@@ -350,7 +375,7 @@ bool Renderer::Draw()
 		return false;
 	}
 	return true;
-	
+#pragma endregion
 }
 
 void Renderer::Cleanup()
@@ -368,7 +393,6 @@ void Renderer::handleKeyboard(int key)
 		BirdPositionY += JumpStep;
 		SoundEngine->play2D("sound effects/sfx_wing.wav");
 		///PlaySound(TEXT("sound effects/sfx_wing.wav"), NULL, SND_FILENAME | SND_ASYNC);
-		//Camera.Fly(0.1);
 	}
 	if (key == GLFW_KEY_DOWN)
 		BirdModelMatrix *= glm::translate(0.0f, 0.0f, 0.0f);
