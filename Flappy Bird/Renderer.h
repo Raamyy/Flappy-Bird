@@ -25,7 +25,7 @@ class Renderer
 	glm::mat4 MVP_matrix2;
 	glm::mat4 MVP_Default;
 	glm::mat4 BirdModelMatrix;
-	glm::mat4 ModelMatrix;
+	glm::mat4 GroundModelMatrix;
 
 	Texture* texture1;
 	Texture* texture2;

@@ -54,16 +54,16 @@ static const GLfloat verts[] = {
 	1.0f,1.0f,
 
 	//GROUND
-	-1.5,-7.0,0.0f,RED,
+	-3.0,7.0,0.0f,RED,
 	0.0f,0.0f,
 
-	-1.5,-5.0,0.0f,RED,
+	-3.0,8.2,0.0f,RED,
 	0.0f,1.0f,
 
-	35.0f,-7.0,0.0f,RED,
+	30.0f,7.0,0.0f,RED,
 	1.0f,0.0f,
 
-	35.0f,-5.0+7.0,0.0f,RED,
+	30.0f,13.2,0.0f,RED,
 	1.0f,1.0f,
 
 
@@ -188,11 +188,10 @@ void Renderer::Initialize()
 
 	BirdModelMatrix = glm::mat4(1);
 
-	ModelMatrix = glm::mat4(1);
-	ModelMatrix *= glm::translate(-2.0f, 14.0f, 0.0f); //Ground
+	GroundModelMatrix = glm::mat4(1); // GROUND
 
 	MVP_matrix = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * BirdModelMatrix; // mvp bird
-	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * ModelMatrix; // mvp ground
+	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * GroundModelMatrix; // mvp ground
 
 	//Intializing Pipes Array
 	for (int i = 0; i < pipesNumber; i++)
@@ -274,7 +273,7 @@ bool Renderer::Draw()
 
 	// Update Matricees
 	MVP_matrix = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * BirdModelMatrix; 
-	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * ModelMatrix;
+	MVP_matrix2 = Camera.GetProjectionMatrix()* Camera.GetViewMatrix() * GroundModelMatrix;
 
 	// Every 10 frames change textures
 	if (frame % 10 == 0 || frame == 0)
