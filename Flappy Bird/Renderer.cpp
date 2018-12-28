@@ -60,10 +60,10 @@ static const GLfloat verts[] = {
 	-1.5,-5.0,0.0f,RED,
 	0.0f,1.0f,
 
-	25.0f,-7.0,0.0f,RED,
+	35.0f,-7.0,0.0f,RED,
 	1.0f,0.0f,
 
-	25.0f,-5.0,0.0f,RED,
+	35.0f,-5.0+7.0,0.0f,RED,
 	1.0f,1.0f,
 
 
@@ -213,6 +213,7 @@ bool Renderer::Draw()
 	if (frame % 1000 == 0) {
 		PipesFrequency -= 10;
 		cout << "level up !\n";
+		cout<<PipesFrequency<<'\n';
 	}
 
 	glBindVertexArray(VertexArrayID);
@@ -385,7 +386,8 @@ void Renderer::handleMouse(double mouseX, double mouseY)
 	cout << mouseX << " " << mouseY << "\n";
 }
 
-bool Renderer::isColided(Obstacle* o) {
+bool Renderer:: isColided(Obstacle* o)
+{
 
 	bool collisionX = o->currentX <= 14 && o->currentX >= 6;
 
